@@ -1,0 +1,66 @@
+( function ( $ ) {
+    'use strict';
+    $(function () { 
+
+
+    $("#ajaxsearch").submit(function(e){
+        e.preventDefault(); 
+    
+ 
+        var data = {
+            action : "ajaxsearch",
+            search : $("#ajaxsearch").find("#search").val(),
+            product_type : $("#ajaxsearch").find("#product_type").val(),
+            product_line_taxonomy: $("#ajaxsearch").find("#product_line_taxonomy").val(),
+        };
+
+
+
+        $.ajax({
+            type: "POST",
+            url : ajax_url,
+            data : data,
+
+            beforeSend : function ( xhr ) {
+                $('#submit').val('Lade Daten');
+                $('.search-results').empty();
+                $('.search-results').append('<div class="loading-spinner"></div>'); 
+			},
+            success : function(response) {
+
+
+                $("#ajax_filter_search_results").empty();
+                if(response) {
+                    for(var i = 0 ;  i < response.length ; i++) {
+                        var html = "<div class='search-results__items'>";
+                            html += "  <a class='search-results__link' href='" + response[i].permalink + "' title='" + response[i].title + "'>";
+                            html += "  <div class='search-results__title'>" + response[i].title + "</div>";
+                            html += "  </a>";
+                            html += "</div>";
+
+                        $("#ajax_filter_search_results").append(html);
+                    }
+                } else {
+                    var html  = "<div class='alert alert alert--warning'>No matching entries found. Try a different filter or search keyword</div>";
+                    $("#ajax_filter_search_results").append(html);
+                }
+
+                $('#submit').val("Nochmal Suchen"); // changing the button label back
+            },
+
+            error: function(xhr, statusText, err){
+
+                $("#ajax_filter_search_results").empty();
+
+                    var html  = "<div class='alert alert alert--warning'>No matching entries found. Try a different filter or search keyword</div>";
+                    $("#ajax_filter_search_results").append(html);
+                    $('#submit').val('Suchen'); 
+            }
+        });
+
+
+    });
+
+});
+  
+} ( jQuery ) );

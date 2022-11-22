@@ -1,0 +1,153 @@
+( function ( $ ) {
+    'use strict';
+    $(function () { 
+
+
+
+
+    $("#ajaxsearchcommitments").submit(function(e){
+        e.preventDefault(); 
+    
+
+        var data = {
+            action : "ajaxsearchcommitments",
+            search : $("#ajaxsearchcommitments").find("#search").val(),
+            lz_auswahl : $("#ajaxsearchcommitments").find("#lz_auswahl").val(),
+            alert_type : $("#ajaxsearchcommitments").find("#alert_type").val(),
+            commitment_month : $("#ajaxsearchcommitments").find("#commitment_month").val(),
+            commitment_date : $("#ajaxsearchcommitments").find("#commitment_date").val(),
+            //product_line_taxonomy: $("#ajaxsearchcommitments").find("#product_line_taxonomy").val(),
+        };
+
+
+        $.ajax({
+            type: "POST",
+            url : ff_commit.ajax_url_commitments,
+            data : data,
+
+            beforeSend : function ( xhr ) {
+
+                $('.submit_commitment_results').empty();
+                $('.submit_commitment_results').append('<div class="loading-spinner"></div>'); 
+			},
+            success : function(response) {
+
+                // changing the button label should come here. Loading data
+                
+                $("#submit_commitment_results").empty();
+
+
+                if(response) {
+
+                    
+
+                    for(var i = 0 ;  i < response.length ; i++) {
+
+                        console.log(response[i].total);
+                        var c = response[i].commitment_category;
+                        
+                        switch(c) {
+                            case "Fehlalarm":
+                              c = "<span class='alert-type alert-type-green'></span>"
+                                break;
+                            case "Brandeinsatz":
+                              c = "<span class='alert-type alert-type-red'></span>";
+                              break;
+                            case "THL":
+                              c = "<span class='alert-type alert-type-blue'></span>";
+                              break;
+                            case "Sicherheitswache":
+                              c = "<span class='alert-type alert-type-gray'></span>";
+                              break;
+                            case "FEZ":
+                                c = "<span class='alert-type alert-type-yellow'></span>";
+                                break;  
+                            default:
+                              
+                          }
+
+
+                        var img = response[i].commitment_media_gallery;
+                        
+                        if (img == "") {
+                            img = "<span class='lnr lnr-cross-circle'></span>";
+                        } else {
+                            img = "<span class='lnr lnr-picture'></span>";
+                        }
+
+                        var total_html = "<div class='total'>Anzahl der Einsätze: ";
+                            total_html += response[i].total
+                            total_html += "</div>";
+                           
+                        var html = "<div class='commitments-wrapper'>";
+                            html += "<div class='commitments-item'>";
+
+                            html += "<div class='commitments-item__category'>";
+                            html += c;
+                            
+                            html += "<a href='" + response[i].permalink  + "'>";
+                            html += response[i].title;
+                            html += "</a>";
+                            html += "</div>";
+                           
+                            html += "<div class='commitments-item__datetime'>";
+                            html += response[i].commitment_date;
+                            html += "</div>";
+
+                            html += "<div class='commitments-item__place'>";
+                            html += response[i].commitment_place;
+                            html += "</div>";
+
+                            html += "<div class='commitments-item__depts'>";
+                            html += response[i].commitment_depts;
+                            html += "</div>";
+
+                            html += "<div class='commitments-item__image'>";
+                            html += img;
+                            html += "</div>";
+
+                            html += "<div class='commitments-item__link'>";
+                            html += "<a href='" + response[i].permalink  + "'>";
+                            html += "<span class='lnr lnr-arrow-right'></span>";
+                            html += "</a>";
+                            html += "</div>";
+
+
+                            html += "</div>";
+                            html += "</div>";
+
+                        
+                          
+                        $("#submit_commitment_results")
+                        .append(html);
+                    }
+
+
+                    $(".total").empty();
+                    $(".commitments-header").before(total_html);
+
+                } else {
+                    var html  = "<div class='alert alert alert--warning'>Keine Einträge gefunden</div>";
+                    $("#submit_commitment_results").append(html);
+                }
+
+                 // changing the button label should come here
+            },
+
+            error: function(xhr, statusText, err){
+
+                $("#submit_commitment_results").empty();
+
+                    var html  = "<div class='alert alert alert--warning'>Keine Einträge gefunden</div>";
+                    $("#submit_commitment_results").append(html);
+            }
+        });
+
+
+    });
+
+
+
+});
+  
+} ( jQuery ) );
